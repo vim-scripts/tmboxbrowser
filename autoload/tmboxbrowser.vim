@@ -3,16 +3,12 @@
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2007-04-21.
-" @Last Change: 2007-05-23.
-" @Revision:    0.1.641
+" @Last Change: 2007-07-01.
+" @Revision:    0.1.650
 "
 " TODO:
 
 if &cp || exists("loaded_tmboxbrowser_autoload")
-    finish
-endif
-if !exists('loaded_tlib')
-    echoerr "tlib is required"
     finish
 endif
 let loaded_tmboxbrowser_autoload = 1
@@ -30,16 +26,16 @@ function! tmboxbrowser#TMBoxSelect(bang)
     endif
     let mboxes = split(globpath(g:tmboxbrowser_path, '**'), '\n')
     call filter(mboxes, 'v:val !~ ''\.\(sbd\|msf\|dat\|html\)$''')
-    let mbox   = tlib#InputList('s', 'Select mbox', mboxes)
+    let mbox   = tlib#input#List('s', 'Select mbox', mboxes)
     if !empty(mbox)
         " TLogVAR mbox
-        " exec 'edit '. tlib#ExArg(mbox)
+        " exec 'edit '. tlib#arg#Ex(mbox)
         call tmboxbrowser#TMBoxBrowse(a:bang, mbox)
     endif
 endf
 
 fun! tmboxbrowser#TMBoxBrowse(...)
-    exec tlib#Args(['bang', 'file'])
+    exec tlib#arg#Let(['bang', 'file'])
     let markread = empty(bang)
     " TLogVAR bang
     " TLogVAR file
@@ -49,7 +45,7 @@ fun! tmboxbrowser#TMBoxBrowse(...)
     if !exists('b:tmboxbrowser_bufnr') || !empty(file) || !markread
         if !empty(file)
             " TLogDBG 'edit '. file
-            exec 'edit '. tlib#ExArg(file)
+            exec 'edit '. tlib#arg#Ex(file)
         endif
         " TAssert bufname('%') != s:scratch_name
         let b:tmboxbrowser_bufnr  = bufnr('%')
@@ -58,9 +54,9 @@ fun! tmboxbrowser#TMBoxBrowse(...)
         let b:tmboxbrowser_index  = {}
         let b:tmboxbrowser_ids    = []
         let mbox                  = expand('%:p')
-        let b:tmboxbrowser_data   = tlib#GetCacheName('tmbox', mbox, 1)
+        let b:tmboxbrowser_data   = tlib#cache#Filename('tmbox', mbox, 1)
         " g:tmboxbrowser_datadir . 
-        "             \ substitute(tlib#RelativeFilename(mbox, g:tmboxbrowser_datadir), '\W', '_', 'g')
+        "             \ substitute(tlib#file#Relative(mbox, g:tmboxbrowser_datadir), '\W', '_', 'g')
         call s:SetIgnore(markread)
         silent keepjumps g /^From /call s:CollectHeader(b:tmboxbrowser_index, b:tmboxbrowser_ids)
         if !empty(b:tmboxbrowser_ids)
@@ -78,7 +74,7 @@ fun! tmboxbrowser#TMBoxBrowse(...)
     let mlist = s:GetList(b:tmboxbrowser_bufnr)
     if !empty(mlist)
         call s:SetInputListParams(1)
-        let mailid = tlib#InputList('m', 'Select Mail', mlist, [
+        let mailid = tlib#input#List('m', 'Select Mail', mlist, [
                     \ {'key': 24, 'agent': s:SNR() .'AgentToggleMarkRead', 'key_name': '<c-x>', 'help': 'Toggle mark read'},
                     \ {'key': 20, 'agent': s:SNR() .'AgentToggleHideRead', 'key_name': '<c-t>', 'help': 'Toggle show read'},
                     \ {'pick_last_item': 0},
@@ -173,7 +169,7 @@ endf
 fun! s:GetList(bufnr)
     " TLogVAR a:bufnr
     let mails = s:MBoxVar(a:bufnr, 'copy(b:tmboxbrowser_ids)')
-    let sort  = s:MBoxVar(a:bufnr, "tlib#GetValue('tmboxbrowser_sort', 'bg')")
+    let sort  = s:MBoxVar(a:bufnr, "tlib#var#Get('tmboxbrowser_sort', 'bg')")
     if !empty(sort)
         if sort == '-'
             call reverse(mails)
@@ -182,7 +178,12 @@ fun! s:GetList(bufnr)
     if s:MBoxVar(a:bufnr, 'b:tmboxbrowser_markread')
         let ignore = s:MBoxVar(a:bufnr, 'b:tmboxbrowser_ignore')
         if !empty(ignore)
-            call filter(mails, 'index(ignore, v:val) == -1')
+            let mails1 = filter(copy(mails), 'index(ignore, v:val) == -1')
+            if empty(mails1) && g:tmboxbrowser_if_no_unread_mails_show_all
+                echom 'TMBOX: No unread mails. Displaying all mails.'
+            else
+                let mails = mails1
+            endif
         endif
     endif
     return mails
@@ -228,7 +229,7 @@ fun! s:ViewMail(id, winnr)
         call append(0, contents[1:-1])
         let parts       = s:CollectMultipart(boundary)
         let part_names  = map(copy(parts), 'v:val["contenttype"]')
-        let parts_index = tlib#InputList('si', 'Select part', part_names, [], 0)
+        let parts_index = tlib#input#List('si', 'Select part', part_names, [], 0)
         if parts_index > 0
             " let mail = extend(parts[parts_index - 1], mail)
             let mail = extend(parts[parts_index - 1], mail, 'keep')
@@ -277,12 +278,12 @@ fun! s:ViewMail(id, winnr)
                     let image = contents[mail.top : -1]
                     let fn64  = filename .'.base64'
                     call writefile(image, fn64)
-                    silent exec printf(g:tmboxbrowser_decode_base64, tlib#ExArg(fn64), tlib#ExArg(filename))
+                    silent exec printf(g:tmboxbrowser_decode_base64, tlib#arg#Ex(fn64), tlib#arg#Ex(filename))
                     call delete(fn64)
                     if exists('*VikiOpenSpecialFile')
                         call VikiOpenSpecialFile(filename)
                     else
-                        silent exec '!'. g:netrw_browsex_viewer .' '. tlib#ExArg(filename)
+                        silent exec '!'. g:netrw_browsex_viewer .' '. tlib#arg#Ex(filename)
                     endif
                 endif
             finally
@@ -478,4 +479,7 @@ CHANGES:
 0.1
 Initial release
 
+0.2
+- Show all mails if there are no unread mails.
+- Require tlib 0.9
 

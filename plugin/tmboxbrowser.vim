@@ -3,20 +3,23 @@
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2007-04-21.
-" @Last Change: 2007-05-23.
-" @Revision:    0.1.66
+" @Last Change: 2007-07-01.
+" @Revision:    0.2.71
 " 
 " TODO:
-" - handle multipart documents
+" - Sending e-mails?
+" - Handle thunderbird drafts mbox?
 
 if &cp || exists("loaded_tmboxbrowser")
     finish
 endif
-if !exists('loaded_tlib') || loaded_tlib < 6
-    echoerr 'tlib >= 0.6 is required'
+if !exists('loaded_tlib') || loaded_tlib < 9
+    echoerr 'tlib >= 0.9 is required'
     finish
 endif
-let loaded_tmboxbrowser = 1
+let loaded_tmboxbrowser = 2
+
+exec tlib#var#Let('g:tmboxbrowser_if_no_unread_mails_show_all', 1)
 
 if !exists('g:tmboxbrowser_attachments_dir')
     let g:tmboxbrowser_attachments_dir = resolve(fnamemodify(tempname(), ':p:h'))
@@ -48,12 +51,4 @@ endif
 
 command! -bang -bar -nargs=? -complete=file TMBoxBrowser call tmboxbrowser#TMBoxBrowse("<bang>", <q-args>)
 command! -bang -bar TMBoxSelect call tmboxbrowser#TMBoxSelect("<bang>")
-
-
-finish
-
-CHANGES
-
-0.1
-Initial release
 

@@ -29,7 +29,7 @@ Usage~
     Open a index list with the e-mails in the currently opened mbox.
     With [!], read items are displayed too. In this mode, no e-mails are 
     marked as read.
-    If [FILE] is given, the display the file is (newly) edited.
+    If [FILE] is given, the file is (newly) edited.
     I.e. if you open a mbox, mark all items as read and then want to 
     browse the file again, you'll have to type>
 
