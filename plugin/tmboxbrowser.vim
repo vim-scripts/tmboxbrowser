@@ -3,8 +3,8 @@
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2007-04-21.
-" @Last Change: 2007-07-01.
-" @Revision:    0.2.71
+" @Last Change: 2007-07-18.
+" @Revision:    0.2.72
 " 
 " TODO:
 " - Sending e-mails?
@@ -13,8 +13,8 @@
 if &cp || exists("loaded_tmboxbrowser")
     finish
 endif
-if !exists('loaded_tlib') || loaded_tlib < 9
-    echoerr 'tlib >= 0.9 is required'
+if !exists('loaded_tlib') || loaded_tlib < 10
+    echoerr 'tlib >= 0.10 is required'
     finish
 endif
 let loaded_tmboxbrowser = 2

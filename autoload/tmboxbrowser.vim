@@ -3,10 +3,8 @@
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Created:     2007-04-21.
-" @Last Change: 2007-07-01.
-" @Revision:    0.1.650
-"
-" TODO:
+" @Last Change: 2007-07-18.
+" @Revision:    660
 
 if &cp || exists("loaded_tmboxbrowser_autoload")
     finish
@@ -196,7 +194,7 @@ fun! s:ViewMail(id, winnr)
     " TAssert IsDictionary(bidx)
     let mail = bidx[a:id]
     " TLogVAR mail.top
-    call tlib#UseScratch({'scratch': s:scratch_name, 'scratch_split': 0})
+    call tlib#scratch#UseScratch({'scratch': s:scratch_name, 'scratch_split': 0})
     " TAssert IsEqual(fnamemodify(bufname('%'), ':t'), '__MBOX_Browser__')
     let b:tmboxbrowser_bufnr = bufnr
     " TLogVAR b:tmboxbrowser_bufnr
@@ -482,4 +480,8 @@ Initial release
 0.2
 - Show all mails if there are no unread mails.
 - Require tlib 0.9
+
+0.3
+- Require tlib 0.10
+- FIX: Problem with scratch related functions
 
